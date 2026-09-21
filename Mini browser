@@ -1,1 +1,31 @@
+javascript:(()=>{const existing=document.getElementById('mini-browser-root');if(existing){existing.remove();return;}const root=document.createElement('div');root.id='mini-browser-root';root.style.position='fixed';root.style.top='48px';root.style.left='48px';root.style.width='840px';root.style.maxWidth='calc(100vw - 96px)';root.style.height='560px';root.style.maxHeight='calc(100vh - 96px)';root.style.background='#1e1e1e';root.style.border='1px solid #444';root.style.borderRadius='12px';root.style.boxShadow='0 18px 40px rgba(0,0,0,0.5)';root.style.zIndex='2147483647';root.style.overflow='hidden';root.style.fontFamily='Arial, sans-serif';root.style.color='#fff';
 
+const toolbar=document.createElement('div');toolbar.style.display='flex';toolbar.style.alignItems='center';toolbar.style.gap='8px';toolbar.style.padding='8px';toolbar.style.background='#2a2a2a';toolbar.style.borderBottom='1px solid #444';toolbar.style.cursor='move';toolbar.style.userSelect='none';
+
+const title=document.createElement('div');title.textContent='Mini Browser';title.style.fontSize='14px';title.style.fontWeight='700';title.style.color='#ddd';title.style.flex='1';
+
+const closeBtn=document.createElement('button');closeBtn.textContent='✕';closeBtn.style.border='none';closeBtn.style.background='#ff5f57';closeBtn.style.color='#111';closeBtn.style.borderRadius='50%';closeBtn.style.width='22px';closeBtn.style.height='22px';closeBtn.style.cursor='pointer';closeBtn.onclick=()=>root.remove();
+
+const navWrap=document.createElement('div');navWrap.style.display='flex';navWrap.style.gap='8px';navWrap.style.padding='8px';navWrap.style.background='#202020';navWrap.style.borderBottom='1px solid #444';
+
+const backBtn=document.createElement('button');backBtn.textContent='←';backBtn.style.padding='6px 10px';backBtn.style.border='1px solid #555';backBtn.style.background='#333';backBtn.style.color='#fff';backBtn.style.borderRadius='6px';backBtn.style.cursor='pointer';
+const forwardBtn=document.createElement('button');forwardBtn.textContent='→';forwardBtn.style.padding='6px 10px';forwardBtn.style.border='1px solid #555';forwardBtn.style.background='#333';forwardBtn.style.color='#fff';forwardBtn.style.borderRadius='6px';forwardBtn.style.cursor='pointer';
+const refreshBtn=document.createElement('button');refreshBtn.textContent='↻';refreshBtn.style.padding='6px 10px';refreshBtn.style.border='1px solid #555';refreshBtn.style.background='#333';refreshBtn.style.color='#fff';refreshBtn.style.borderRadius='6px';refreshBtn.style.cursor='pointer';
+const urlInput=document.createElement('input');urlInput.type='text';urlInput.value='https://example.com';urlInput.style.flex='1';urlInput.style.padding='8px 12px';urlInput.style.borderRadius='8px';urlInput.style.border='1px solid #555';urlInput.style.background='#111';urlInput.style.color='#fff';urlInput.style.fontSize='14px';
+const goBtn=document.createElement('button');goBtn.textContent='Go';goBtn.style.padding='8px 12px';goBtn.style.border='none';goBtn.style.background='#3b82f6';goBtn.style.color='#fff';goBtn.style.borderRadius='8px';goBtn.style.cursor='pointer';
+
+const frame=document.createElement('iframe');frame.style.width='100%';frame.style.height='calc(100% - 94px)';frame.style.border='0';frame.style.background='#fff';frame.src='https://example.com';
+
+const current={history:[],index:-1};function loadURL(raw){let u=raw.trim();if(!u){return;}if(!/^https?:\/\//i.test(u)){u='https://'+u;}urlInput.value=u;try{frame.src=u;current.history.push(u);current.index=current.history.length-1;}catch(e){}};
+
+backBtn.onclick=()=>{if(current.index>0){current.index--;urlInput.value=current.history[current.index];frame.src=current.history[current.index];}};
+forwardBtn.onclick=()=>{if(current.index < current.history.length-1){current.index++;urlInput.value=current.history[current.index];frame.src=current.history[current.index];}};
+refreshBtn.onclick=()=>{frame.contentWindow ? frame.contentWindow.location.reload() : frame.src = frame.src;};
+goBtn.onclick=()=>loadURL(urlInput.value);
+urlInput.addEventListener('keydown',(e)=>{if(e.key==='Enter'){loadURL(urlInput.value);}});
+
+let dragging=false,offsetX=0,offsetY=0;toolbar.addEventListener('mousedown',(e)=>{dragging=true;const rect=root.getBoundingClientRect();offsetX=e.clientX-rect.left;offsetY=e.clientY-rect.top;});document.addEventListener('mousemove',(e)=>{if(!dragging)return;root.style.left=(e.clientX-offsetX)+'px';root.style.top=(e.clientY-offsetY)+'px';});document.addEventListener('mouseup',()=>dragging=false);
+
+toolbar.appendChild(title);toolbar.appendChild(closeBtn);
+navWrap.appendChild(backBtn);navWrap.appendChild(forwardBtn);navWrap.appendChild(refreshBtn);navWrap.appendChild(urlInput);navWrap.appendChild(goBtn);
+root.appendChild(toolbar);root.appendChild(navWrap);root.appendChild(frame);document.body.appendChild(root);})();
